@@ -45,14 +45,18 @@ spring.jms.template.receive-timeout=2s
 
 ##### Client.java
 Use JmsTemplate to send a request to MQ Server. Also, implement the CallBack method to process returned message.
+To share the same structure data, used ObjectMapper to conver the message to JSON format.
+* If you want to a send object itself, consumer must have same structured class as well.
 ```java
 ...
-TextMessage receivedMsg = (TextMessage) jmsTemplate.sendAndReceive("inbound.queue", new MessageCreator(){
-    @Override
-    public Message createMessage(Session session) throws JMSException {
-        return session.createTextMessage(strMsg);
-    }
-});
+TextMessage receivedMsg = (TextMessage) jmsTemplate.sendAndReceive("inbound.queue",
+                                session -> {
+                                    try {
+                                        return session.createTextMessage(mapper.writeValueAsString(person));
+                                    } catch (JsonProcessingException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
 ...
 ```
 
