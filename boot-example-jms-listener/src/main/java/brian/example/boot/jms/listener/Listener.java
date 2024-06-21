@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.util.Date;
 import java.util.Map;
 
 @Component
@@ -27,18 +28,18 @@ public class Listener {
 
         System.out.println("Listener Received Message: "+message);
 
-        String response = null;
+        Person person = null;
         if( message instanceof TextMessage){
             TextMessage textMessage = (TextMessage) message;
-            Person person = mapper.readValue(textMessage.getText(), Person.class);
-            response = "Hello "+person.getName();
+            person = mapper.readValue(textMessage.getText(), Person.class);
+            person.setReceivedDateTime(new Date());
             // You can also use mapper to map the received
 //            Map map = mapper.readValue(textMessage.getText(), Map.class);
 //            response = "Hello "+map.get("name");
 
-            System.out.println("Sending back Message: "+response);
+            System.out.println("Sending back Message: "+person);
         }
 
-        return response;
+        return mapper.writeValueAsString(person);
     }
 }

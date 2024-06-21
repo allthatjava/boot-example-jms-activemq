@@ -12,7 +12,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.jms.*;
+import java.sql.Timestamp;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.Enumeration;
 
 @EnableScheduling
@@ -33,8 +35,9 @@ public class Client {
 
         LocalTime time = LocalTime.now();
 
-        Person person = new Person("Brian " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond());
-        System.out.println(String.format("Sending Message: %s", person.getName()));
+        Person person = Person.builder().name("Brian " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond())
+                .createdDateTime(new Date()).build();
+        System.out.println(String.format("Sending Message: %s", person.toString()));
 
 //        TextMessage receivedMsg = (TextMessage) jmsTemplate.sendAndReceive("inbound.queue", new MessageCreator() {
 //            @Override
@@ -55,9 +58,14 @@ public class Client {
                                             }
                                         });
 
-        if (receivedMsg != null)
-            System.out.println(String.format("Returned Message: %s", receivedMsg.getText()));
-        else
+        if (receivedMsg != null) {
+            try {
+                Person updatedPerson = mapper.readValue(receivedMsg.getText(), Person.class);
+                System.out.println(String.format("Returned Message: %s", updatedPerson.toString()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }else
             System.out.println("Received null message");
     }
 }

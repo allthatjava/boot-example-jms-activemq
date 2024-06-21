@@ -5,15 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Person implements Serializable {
     private String name;
+    private Date createdDateTime;
+    private Date receivedDateTime;
 
-    @Override
-    public String toString(){
-        return String.format("Email{name=%s, body=%s}", getName());
-    }
 }
